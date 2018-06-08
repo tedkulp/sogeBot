@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Alerts</title>
+    <meta charset="utf-8">
+    <meta name="robots" content="index, follow">
+    <meta name="theme-color" content="#f4f5f6">
+    <meta name="apple-mobile-web-app-status-bar-style" content="#f4f5f6">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Condensed" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Catamaran" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Cabin+Condensed" rel="stylesheet">
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript" src="/auth/token.js"></script>
+    <script type="text/javascript" src="/dist/flv.js/js/flv.min.js"></script>
+
+    <style>
+      html, body {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+        font-family: 'Cabin Condensed';
+        color: white;
+      }
+
+      #alert {
+        position: relative;
+      }
+
+      .shadow {
+        text-shadow: 2px 2px 2px rgb(0, 0, 0);
+      }
+
+      .message {
+        font-size: 1.2rem;
+        width: fit-content;
+        max-width: 600px;
+        text-align:center;
+        margin: auto;
+        opacity: 0;
+      }
+
+      .follow {
+        font-size: 1.2rem;
+        width: fit-content;
+        margin: auto;
+        padding-top: 10rem;
+      }
+
+      .follow .highlight {
+        color: black;
+        background-color: #7bff00;
+        width: max-content;
+        margin: auto;
+        padding: 0.2rem 1rem;
+        filter: blur(50px);
+      }
+
+
+      .username {
+        font-size: 3rem;
+        z-index: -1;
+        padding: 1rem;
+        padding-top: 0;
+        padding-bottom: 0;
+        background-color: rgba(200, 200, 200, 0.1);
+        height: 0;
+        overflow: hidden;
+      }
+
+      .borders {
+        border-top: 2px solid #7bff00;
+        margin: auto;
+        width: 0;
+      }
+
+      span {  padding: 0.2rem 0.5rem 0 0.5rem; }
+    </style>
+  </head>
+  <body>
+
+    <div id="alert">
+      <div class="follow">
+        <div class="text highlight border"></div>
+        <div style="position: relative; top: -15px; z-index: -1">
+          <div class="borders"></div>
+          <div class="shadow username"></div>
+          <div class="borders show" style="display: none"></div>
+        </div>
+      </div>
+      <div class="shadow message"></div>
+    </div>
+    <script src="/dist/jquery/js/jquery.min.js"></script>
+    <script src="/dist/lodash/js/lodash.min.js"></script>
+    <script src="/dist/velocity-animate/js/velocity.min.js"></script>
+    <script>
+      $.urlParam = function(name){
+        var results = new RegExp('[\?&]' + name + '=([^&#]*)').exec(window.location.href);
+        if (results==null){
+          return null;
+        }
+        else{
+          return decodeURI(results[1]) || 0;
+        }
+    }
+
+    let username = $.urlParam('username') || 'n/a'
+    let viewers = $.urlParam('viewers') || '0'
+    let amount = $.urlParam('amount') || '0'
+    let currency = $.urlParam('currency') || 'CZK'
+    let message = $.urlParam('message') || 'n/a'
+    let type = $.urlParam('type') || 'follow'
+    let locale = ''
+    switch (type) {
+      case 'follow':
+        $('.text').text('Nový Follow')
+        break
+      case 'sub':
+        $('.text').text('Nový Subscriber')
+        break
+      case 'resub':
+        $('.text').text(`${amount} Měsíční Resub`)
+        break
+      case 'tip':
+        $('.text').text(`${amount}${currency}`)
+        $('.message').text(message)
+        break
+      case 'cheer':
+        locale = 'Bitů'
+        if (Number(amount) === 1) locale = 'Bit'
+        else if (Number(amount) > 1 && Number(amount) < 5) locale = "Bity"
+        $('.text').text(`${amount} ${locale}`)
+        $('.message').text(message)
+        break
+      case 'raid':
+      case 'host':
+        locale = 'Diváků'
+        if (Number(viewers) === 1) locale = 'Divák'
+        else if (Number(viewers) > 1 && Number(viewers) < 5) locale = "Diváci"
+        $('.text').text(`${viewers} ${locale}`)
+        break
+    }
+
+    $('.username').text(username)
+
+    // animation
+    $('.highlight').velocity({ blur: 0 }, { duration: 2000 })
+    $('.borders').velocity({ width: '100%' }, { delay: 2000, duration: 1000})
+    $('.username').velocity({ height: '45px', 'padding-top': '0.5rem', 'padding-bottom': '1rem' }, { delay: 3000, duration: 1000})
+    setTimeout(() => $('.show').css('display', 'block'), 3000)
+    $('.message').velocity({ opacity: 1 }, { delay: 4000, duration: 2000 })
+
+
+    $('#alert')
+      .velocity({ top: 25 }, { delay: 8000, duration: 500}, "easeOutQuad")
+      .velocity({ top: -200, opacity: 0 }, 500, "easeInSine");
+    </script>
+  </body>
+</html>
