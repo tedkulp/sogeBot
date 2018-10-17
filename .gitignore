@@ -9,6 +9,7 @@ npm-shrinkwrap.json*
 *.zip
 config.json
 *.db
+custom
 
 public/dist/*
 public/custom/*

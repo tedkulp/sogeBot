@@ -6,6 +6,7 @@ require('module-alias/register')
 const figlet = require('figlet')
 const cluster = require('cluster')
 const os = require('os')
+const fs = require('fs')
 const util = require('util')
 const _ = require('lodash')
 const chalk = require('chalk')
@@ -80,11 +81,18 @@ async function main () {
   }))
 
   global.lib.translate._load().then(function () {
-    global.systems = require('auto-load')('./dest/systems/')
-    global.widgets = require('auto-load')('./dest/widgets/')
-    global.overlays = require('auto-load')('./dest/overlays/')
-    global.games = require('auto-load')('./dest/games/')
-    global.integrations = require('auto-load')('./dest/integrations/')
+    const loadResource = function(key) {
+      global[key] = require('auto-load')('./dest/' + key + '/')
+      if (fs.existsSync('./custom/' + key + '/')) {
+        global[key] = _.merge(global[key], require('auto-load')('./custom/' + key + '/'))
+      }
+    }
+
+    loadResource('systems')
+    loadResource('widgets')
+    loadResource('overlays')
+    loadResource('games')
+    loadResource('integrations')
 
     global.panel.expose()
 
