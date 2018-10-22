@@ -33,10 +33,17 @@ function cluster () {
   global.api = new (require('./api'))()
 
   global.lib.translate._load().then(function () {
-    global.systems = require('auto-load')('./dest/systems/')
-    global.overlays = require('auto-load')('./dest/overlays/')
-    global.games = require('auto-load')('./dest/games/')
-    global.integrations = require('auto-load')('./dest/integrations/')
+    const loadResource = function(key) {
+      global[key] = require('auto-load')('./dest/' + key + '/')
+      if (fs.existsSync('./custom/' + key + '/')) {
+        global[key] = _.merge(global[key], require('auto-load')('./custom/' + key + '/'))
+      }
+    }
+
+    loadResource('systems')
+    loadResource('overlays')
+    loadResource('games')
+    loadResource('integrations')
 
     process.on('message', async (data) => {
       switch (data.type) {
